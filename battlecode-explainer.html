@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Battlecode Dragons Explained</title>
+<style>
+:root{--bg:#07141f;--panel:#0d2230;--panel2:#123043;--ink:#e6f1f7;--muted:#8fb0c2;--line:#1d4459;--a:#4aa3ff;--b:#ff9a3c;--kelp:#3fcf6e;--portal:#c07bff;--bad:#ff5a6a;--good:#5ee0a0}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header,section{max-width:1120px;margin:0 auto;padding:16px 16px}
+header{padding-top:34px}
+.kicker{color:var(--muted);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+h1{font-size:30px;line-height:1.2;margin:6px 0 8px}
+h2{font-size:22px;margin:0 0 10px}
+h3{font-size:16px;margin:16px 0 6px}
+p{margin:6px 0 10px}
+a{color:#8cc8ff}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.muted{color:var(--muted)}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.toc a{background:var(--panel2);border:1px solid var(--line);padding:5px 11px;border-radius:999px;text-decoration:none;color:var(--ink);font-size:14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:12px}
+.fact{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
+.fact b{display:block;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.fact span{font-size:15px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit;font-size:14px}
+button.primary{background:#1c5a85;border-color:#2a74a8}
+button:hover:not(:disabled){filter:brightness(1.25)}
+button:disabled{opacity:.45;cursor:default}
+select,input[type=number]{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:14px}
+label{font-size:14px;color:var(--muted)}
+label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--ink)}
+canvas{display:block;max-width:100%;height:auto;border-radius:8px}
+.boardwrap{background:#061019;border:1px solid var(--line);border-radius:10px;padding:8px;display:flex;justify-content:center}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tabs button.on{background:#1c5a85;border-color:#2a74a8}
+.caption{min-height:96px;background:#0a1b27;border-left:3px solid var(--a);padding:12px 14px;border-radius:8px}
+.stepcount{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.stats{display:grid;grid-template-columns:auto 1fr 1fr;gap:4px 14px;font-variant-numeric:tabular-nums;background:#0a1b27;border-radius:8px;padding:10px 12px}
+.ta{color:var(--a);font-weight:700}.tb{color:var(--b);font-weight:700}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+code{background:#0a1b27;padding:1px 5px;border-radius:4px}
+pre{background:#0a1b27;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;margin:6px 0;line-height:1.45}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;margin:8px 0}
+.flow .box{flex:1 1 150px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;position:relative}
+.flow .box .n{display:inline-block;width:22px;height:22px;border-radius:50%;background:#1c5a85;text-align:center;font-size:13px;line-height:22px;margin-right:6px}
+.bar{height:24px;background:#0a1b27;border-radius:6px;position:relative;overflow:hidden;margin:3px 0 10px}
+.bar span{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.bar em{position:absolute;right:8px;top:2px;font-style:normal;font-size:13px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin:8px 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block}
+.banner{margin-top:10px;padding:10px 12px;border-radius:8px;background:#11331f;border:1px solid #2a7a4a;display:none}
+.log{font-size:13px;max-height:170px;overflow:auto;background:#0a1b27;border-radius:8px;padding:8px 10px;margin:0;list-style:none}
+.log li{padding:2px 0;border-bottom:1px solid #102838}
+.follow{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+@media(max-width:520px){.follow{grid-template-columns:1fr}}
+ol.plan{padding-left:20px}
+ol.plan li{margin-bottom:12px}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:#1c3b52;color:#bfe0f5;margin-left:6px;vertical-align:middle}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--b);background:#1d1a12;padding:10px 12px;border-radius:8px;margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">UNSW Battlecode · Season 01 · Team Ocean_prime</div>
+  <h1>How the dragon game runs, and what we have to build</h1>
+  <p class="muted">Everything moving on this page is driven by a small JavaScript copy of the engine written from the official docs: same turn order, same collision checks, same sprint costs, same split and sonar rules. Work top to bottom: the big picture, one round in slow motion, the rule demos, then full matches between different bot strategies.</p>
+  <nav class="toc">
+    <a href="#big">1. Big picture</a><a href="#loop">2. One round</a><a href="#rules">3. Rule demos</a><a href="#sim">4. Full match</a><a href="#count">5. How many dragons</a><a href="#budget">6. Compute budget</a><a href="#plan">7. What we build</a>
+  </nav>
+</header>
+
+<section id="big">
+  <div class="card">
+    <h2>1. The game in one screen</h2>
+    <p>Think multiplayer Snake on a wrap-around ocean floor. Each team controls a swarm of snake-shaped "dragons". Dragons eat pearls to grow, crash into things and die, and can split themselves in two. You write <b>one program</b>; the engine runs a separate copy of it for every dragon you own.</p>
+    <div class="facts">
+      <div class="fact"><b>Map</b><span>10 to 64 tiles per side. Edges wrap around. Always symmetric (mirror or 180° rotation), so both teams get a fair board.</span></div>
+      <div class="fact"><b>Length of a game</b><span>At most 500 rounds. In each round every living dragon takes exactly one turn.</span></div>
+      <div class="fact"><b>Your units</b><span>The map file decides your starting dragons (the 11×11 arena gives 1 each, length 3). Splitting makes more, up to 64 alive at once.</span></div>
+      <div class="fact"><b>One program, many copies</b><span>No shared memory between dragons. A child from a split starts with a blank memory. Sonar is the only way to talk.</span></div>
+      <div class="fact"><b>Sight</b><span>Each dragon sees a 7×7 square (49 tiles) around its own head. Nothing else.</span></div>
+      <div class="fact"><b>The only resource</b><span>Pearls. Eating one = +1 length. Dead dragons turn half their body into pearls.</span></div>
+      <div class="fact"><b>Compute</b><span>100 million CPU points per dragon per turn in the judge's sandbox. Run out and that dragon dies.</span></div>
+      <div class="fact"><b>How you win</b><span>Wipe out every enemy dragon. Otherwise at round 500: team with the longest single living dragon wins, then total length, then draw.</span></div>
+    </div>
+    <div class="note">The scoring rule shapes everything. A pile of small dragons loses to one long dragon at round 500. But small dragons collect pearls faster and see more of the map. Balancing that is the core strategic question.</div>
+  </div>
+</section>
+
+<section id="loop">
+  <div class="card">
+    <h2>2. What happens in one round</h2>
+    <p>The engine is a loop. Once you understand its order, most "why did my dragon die?" replays explain themselves.</p>
+    <h3>A round</h3>
+    <div class="flow">
+      <div class="box"><span class="n">1</span><b>Pearls tick.</b> Every tile's countdown drops by 1. At 0 the tile spawns a pearl if nothing is on it, then draws a fresh countdown.</div>
+      <div class="box"><span class="n">2</span><b>Dragons act in id order.</b> #0, then #1, then #2... When #5 moves, #0 to #4 have already moved this round and #6 onward have not.</div>
+      <div class="box"><span class="n">3</span><b>New children act last.</b> A dragon born from a split this round gets the next id and takes its turn at the end of this same round.</div>
+      <div class="box"><span class="n">4</span><b>End check.</b> A team with zero dragons loses. At round 500 the length tiebreaks decide.</div>
+    </div>
+    <h3>One dragon's turn</h3>
+    <div class="flow">
+      <div class="box"><span class="n">1</span><b>Engine → your program.</b> Round number, your length and facing, sonar messages, then the 49 tiles you can see, every dragon segment in view, and the kelp/portal edges.</div>
+      <div class="box"><span class="n">2</span><b>Your program thinks.</b> Parse, decide. This is all our code. Budget: 100M points.</div>
+      <div class="box"><span class="n">3</span><b>Your program → engine.</b> One action (<code>MOVE</code> or <code>SPLIT</code>), optional <code>SONAR</code> pings and debug drawings, then <code>ENDTURN</code>.</div>
+      <div class="box"><span class="n">4</span><b>Engine applies it.</b> The action happens, then sonar rays fly if the dragon survived. No valid action means the dragon dies.</div>
+    </div>
+    <div class="two">
+      <div>
+        <h3>What a reply looks like</h3>
+<pre>LOG heading for the pearl at 4,7
+MOVE NNE
+SONAR E 90210
+PROTOCOL 3
+ENDTURN</pre>
+        <p class="muted">If you print several actions, only the last one counts. If you print none, crash, or run out of budget, the dragon dies that turn.</p>
+      </div>
+      <div>
+        <h3>What the Python template does</h3>
+<pre>ct, game = unswbc.init()      # read ID, TEAM, MAP
+while unswbc.update(ct, game): # read this turn
+    execute_turn()             # OUR CODE
+    unswbc.end_turn()          # print ENDTURN, flush</pre>
+        <p class="muted">The helper library handles the text protocol. Our job is almost entirely <code>execute_turn()</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="card">
+    <h2>3. Rule demos, one step at a time</h2>
+    <p class="muted">Pick a demo, then press <b>Next step</b>. Each press is one round of the engine. These use a small 10×7 demo board so the details are visible (real maps are at least 10×10).</p>
+    <div class="tabs" id="scTabs"></div>
+    <div class="grid2">
+      <div>
+        <div class="boardwrap"><canvas id="scCanvas"></canvas></div>
+        <div class="controls">
+          <button id="scReset">Reset</button>
+          <button class="primary" id="scNext">Next step ▶</button>
+          <span class="stepcount" id="scCount"></span>
+          <label class="chk"><input type="checkbox" id="scVision"> show 7×7 vision of #0</label>
+        </div>
+      </div>
+      <div>
+        <div class="caption" id="scCap"></div>
+        <h3>Reply printed this round</h3>
+        <pre id="scCmd">(nothing yet)</pre>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--a)"></i>Team A (us)</span>
+          <span><i class="sw" style="background:var(--b)"></i>Team B</span>
+          <span><i class="sw" style="background:#f4f1e8;border-radius:50%"></i>Pearl</span>
+          <span><i class="sw" style="background:var(--kelp)"></i>Kelp edge</span>
+          <span><i class="sw" style="background:var(--portal)"></i>Portal edge</span>
+          <span><i class="sw" style="background:transparent;border:2px solid var(--bad)"></i>Death</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sim">
+  <div class="card">
+    <h2>4. A full match</h2>
+    <p class="muted">A random symmetric map with kelp walls, portals and pearl "hot spots". Each team runs one of three simple strategies. Click any dragon to follow it and see exactly what it sees and prints.</p>
+    <div class="controls">
+      <label>Team A <select id="stratA"></select></label>
+      <label>Team B <select id="stratB"></select></label>
+    </div>
+    <div class="controls">
+      <label>Map <select id="mapSize"><option value="16">16×16</option><option value="24" selected>24×24</option><option value="32">32×32</option></select></label>
+      <label>Start dragons per team <select id="startPer"><option>1</option><option selected>2</option><option>3</option></select></label>
+      <label>Seed <input type="number" id="seed" value="7" style="width:80px"></label>
+      <button id="newMap">New match</button>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="boardwrap" id="simWrap"><canvas id="simCanvas"></canvas></div>
+        <div class="controls">
+          <button class="primary" id="play">▶ Play</button>
+          <button id="stepR">Step 1 round</button>
+          <button id="toEnd">Run to end</button>
+          <label>Speed <input type="range" id="speed" min="1" max="40" value="8"></label>
+        </div>
+        <div class="controls">
+          <label class="chk"><input type="checkbox" id="optVision" checked> vision of followed dragon</label>
+          <label class="chk"><input type="checkbox" id="optCd"> pearl countdowns</label>
+          <label class="chk"><input type="checkbox" id="optIds"> ids</label>
+          <label class="chk"><input type="checkbox" id="optSonar"> dragons ping sonar</label>
+        </div>
+        <div class="banner" id="banner"></div>
+      </div>
+      <div>
+        <div class="stats" id="stats"></div>
+        <h3>Following dragon <span id="fTitle"></span></h3>
+        <div class="follow">
+          <div><canvas id="visCanvas"></canvas><div class="muted" style="font-size:12px;margin-top:4px">what it sees (its whole world)</div></div>
+          <div><pre id="fCmd" style="margin-top:0"></pre><div id="fInfo" class="muted" style="font-size:13px"></div></div>
+        </div>
+        <h3>Over time</h3>
+        <canvas id="chart"></canvas>
+        <h3>Event log</h3>
+        <ul class="log" id="log"></ul>
+      </div>
+    </div>
+    <h3>Compare strategies over many games</h3>
+    <p class="muted">This is the testing habit we want locally with <code>unswbc run</code>: never judge a bot from one game. Runs 10 matches on the settings above with different seeds.</p>
+    <div class="controls"><button id="batch">Run 10 matches</button><span id="batchOut" class="muted"></span></div>
+    <details style="margin-top:8px"><summary class="muted">What the three demo strategies do</summary>
+      <table style="margin-top:8px">
+        <tr><th>Strategy</th><th>Logic</th></tr>
+        <tr><td>Starter bot</td><td>What <code>unswbc init</code> gives you: shuffle the 4 directions, step onto the first neighbour not blocked by kelp or a dragon. No planning.</td></tr>
+        <tr><td>Pearl hunter</td><td>Breadth-first search inside the 7×7 window to the nearest reachable pearl. Filters out moves into bodies, kelp, and tiles next to other heads. Scores moves by open space so it avoids boxing itself in.</td></tr>
+        <tr><td>Hunter + split</td><td>Same, but once a dragon reaches length 8 it splits in half (4 + 4). More dragons means more vision and more mouths, at the cost of the "longest dragon" tiebreak.</td></tr>
+      </table>
+    </details>
+  </div>
+</section>
+
+<section id="count">
+  <div class="card">
+    <h2>5. How many dragons will we have?</h2>
+    <div class="two">
+      <div>
+        <h3>At the start</h3>
+        <p>Whatever the map says. Each map file lists starting dragons with their positions, usually length 3, and gives ids in file order. The bundled 11×11 arena gives <b>1 dragon per team</b>. Other maps may give more.</p>
+        <h3>During the game</h3>
+        <p>Only splitting creates dragons. Cap: <b>64 alive per team</b>. Every split needs the child to be at least 2 long and the parent to keep at least 2, so a length-L dragon can make at most about L/2 dragons of length 2.</p>
+        <h3>What that means for our code</h3>
+        <p>64 dragons = 64 separate running copies of our program, each with its own 100M point budget and its own blank memory. Nobody is "in charge". Any coordination has to come from each dragon reasoning about what it sees, or from sonar numbers.</p>
+      </div>
+      <div>
+        <h3>The split trade-off in real numbers</h3>
+        <table>
+          <tr><th></th><th>One dragon, length 8</th><th>Split 4 + 4</th></tr>
+          <tr><td>Tiles seen per turn</td><td>49</td><td>up to 98</td></tr>
+          <tr><td>Pearls eaten per round (max)</td><td>1</td><td>2</td></tr>
+          <tr><td>Longest dragon</td><td>8</td><td>4</td></tr>
+          <tr><td>Pearls dropped if killed</td><td>4</td><td>2 each</td></tr>
+          <tr><td>One head-on crash loses</td><td>everything</td><td>half the team</td></tr>
+        </table>
+        <p class="muted" style="margin-top:8px">Splits are irreversible (dragons never merge), and round 500 is scored by the single longest dragon. A plausible plan: split early to harvest, then late in the game funnel growth into one "king" dragon. A dragon that dies next to the king drops half its length as pearls the king can eat. Worth testing.</p>
+        <p class="muted">One thing the simulator in section 4 shows clearly: with these simple bots, the splitting team usually wins by <b>elimination</b> long before round 500. Every extra dragon is another wall the enemy can crash into. So the tiebreak only matters if both teams survive.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="budget">
+  <div class="card">
+    <h2>6. The compute budget</h2>
+    <p>The judge runs our bot in a WebAssembly sandbox and charges fixed "points" per instruction, not wall time. Each dragon gets <b>100,000,000 points per turn</b>. Figures below are from the docs.</p>
+    <div id="bars"></div>
+    <p class="muted">Your local <code>unswbc run</code> does not enforce this; it only has a 10 second wall clock. Always test with <code>unswbc run --sandbox -v</code>, which prints points used per turn. The first turn is charged too, including your imports.</p>
+    <div class="note">In Python, parsing the round already eats about 10% of the budget, and one 32×32 flood fill another 19%. C++ is about 60× cheaper for the same search. Python is fine to start; if our search gets deeper we may port the hot loop to C++.</div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="card">
+    <h2>7. What we have to build</h2>
+    <p>The whole bot is one function that runs once per dragon per turn. A sensible shape:</p>
+<pre>def execute_turn():
+    moves = legal_moves()              # no kelp, no bodies, not our own tail
+    moves = drop_head_on_risks(moves)  # avoid tiles an enemy head can also reach
+    if should_split():                 # e.g. long enough, safe spot, under 64
+        ct.do_split(ct.get_length() // 2); return
+    target = nearest_pearl()           # BFS inside the 7x7 window
+    ct.make_move(best(moves, target))  # prefer target, open space, safety
+    maybe_send_sonar()                 # share what we saw</pre>
+    <h3>The plan, in order</h3>
+    <ol class="plan">
+      <li><b>Get on the ladder now.</b><span class="tag">before 1 Oct</span><br>Install <code>unswbc</code>, <code>unswbc init python mybot</code>, run it on <code>arena.map</code>, make an API key, submit. Seeding for the Sprint (1 Oct) comes from the rating ladder, and autoscrims only draw teams with an active submission.</li>
+      <li><b>Never die by accident.</b><br>Legal-move filter: kelp, bodies, the own-tail rule, the backwards move, illegal splits, unpayable sprints. Always print an action. Most early rating comes from simply not suiciding.</li>
+      <li><b>Hunt pearls.</b><br>BFS to the nearest visible pearl. Use tile countdowns: a tile at countdown 2 is a pearl two rounds from now. Watch out for enemy heads near targets.</li>
+      <li><b>Decide the split policy.</b><br>When to split, how big, and when to stop splitting and grow a king for the round-500 tiebreak. Test with the 10-game comparison habit.</li>
+      <li><b>Use sonar.</b><br>A 64-bit number per direction per turn. Encode things like "pearl cluster at (x, y)" or "enemy head at (x, y)". Echo counts are a free radar. Remember enemies can hear too.</li>
+      <li><b>Exploit the map.</b><br>Symmetry means knowing our own start tells us where the enemy started. Portals are shortcuts; kelp corridors are traps to push enemies into.</li>
+      <li><b>Fight.</b><br>Cut off enemy dragons with our bodies, force them into walls, and take head-on trades only when our dragon is the shorter one.</li>
+      <li><b>Stay in budget.</b><span class="tag">ongoing</span><br>Check points with <code>--sandbox -v</code>. Leave margin. Consider C++ if Python gets tight.</li>
+    </ol>
+    <table>
+      <tr><th>Date</th><th>Event</th><th>What we want by then</th></tr>
+      <tr><td>1 Oct</td><td>Sprint (online, every team)</td><td>Steps 1 to 3: a bot that doesn't suicide and eats pearls</td></tr>
+      <tr><td>10 Oct</td><td>Qualifiers (online, top 10 advance)</td><td>Steps 4 to 6: split policy, sonar, map awareness</td></tr>
+      <tr><td>17 Oct</td><td>Grand Final at UNSW</td><td>Steps 7 to 8: combat and performance tuning</td></tr>
+    </table>
+  </div>
+</section>
+
+<section><p class="muted" style="font-size:13px">This simulator follows the documented rules but is an approximation for learning, not the official engine. Trust <code>unswbc run</code> for real results.</p></section>
+
+<script>
+'use strict';
+/* ENGINE START */
+const DIRS=['N','E','S','W'];
+const DV={N:[0,-1],E:[1,0],S:[0,1],W:[-1,0]};
+const OPP={N:'S',S:'N',E:'W',W:'E'};
+const ECHO_KINDS=['kelp','ally','ally_head','enemy','enemy_head'];
+function rngFrom(seed){let a=(seed>>>0)||1;return function(){a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+function randInt(r,lo,hi){return lo+Math.floor(r()*(hi-lo+1));}
+
+class Game{
+  constructor(W,H,seed){
+    this.W=W;this.H=H;this.n=W*H;this.seed=seed;this.rng=rngFrom(seed*7919+13);
+    this.pearl=new Uint8Array(this.n);this.gmin=new Int16Array(this.n);this.gmax=new Int16Array(this.n);this.cd=new Int16Array(this.n).fill(-1);
+    this.mirror=null;this.hE=new Int16Array(this.n);this.vE=new Int16Array(this.n);this.portals={};
+    this.grid=new Int32Array(this.n).fill(-1);this.byId=[];this.dragons=[];this.nextId=0;
+    this.round=0;this.maxRounds=500;this.unitLimit=64;this.over=false;this.winner=null;this.endReason='';
+    this.rays=[];this.deaths=[];this.log=[];this.history=[];
+  }
+  wrap(x,y){const W=this.W,H=this.H;return[((x%W)+W)%W,((y%H)+H)%H];}
+  idx(x,y){const p=this.wrap(x,y);return p[1]*this.W+p[0];}
+  edgeRef(x,y,d){if(d==='N')return{o:'h',x,y};if(d==='S')return{o:'h',x,y:(y+1)%this.H};if(d==='W')return{o:'v',x,y};return{o:'v',x:(x+1)%this.W,y};}
+  edgeVal(r){const i=r.y*this.W+r.x;return r.o==='h'?this.hE[i]:this.vE[i];}
+  setEdge(o,x,y,v){const p=this.wrap(x,y);const i=p[1]*this.W+p[0];(o==='h'?this.hE:this.vE)[i]=v;if(v>0)(this.portals[v]=this.portals[v]||[]).push({o,x:p[0],y:p[1]});}
+  edgeKind(x,y,d){const v=this.edgeVal(this.edgeRef(x,y,d));return v===-1?'kelp':v>0?'portal':'open';}
+  step(x,y,d){
+    const ref=this.edgeRef(x,y,d);const v=this.edgeVal(ref);
+    if(v===-1)return{kelp:true};
+    if(v>0){
+      const o=(this.portals[v]||[]).find(p=>!(p.o===ref.o&&p.x===ref.x&&p.y===ref.y));
+      if(o){let nx,ny;if(o.o==='v'){ny=o.y;nx=d==='E'?o.x:o.x-1;}else{nx=o.x;ny=d==='S'?o.y:o.y-1;}const p=this.wrap(nx,ny);return{x:p[0],y:p[1],portal:true};}
+    }
+    const p=this.wrap(x+DV[d][0],y+DV[d][1]);return{x:p[0],y:p[1]};
+  }
+  dirBetween(a,b){for(const d of DIRS){const p=this.wrap(a[0]+DV[d][0],a[1]+DV[d][1]);if(p[0]===b[0]&&p[1]===b[1])return d;}return null;}
+  at(i){const id=this.grid[i];if(id<0)return null;const d=this.byId[id];const h=d.body[0],t=d.body[d.body.length-1];return{d,head:h[1]*this.W+h[0]===i,tail:t[1]*this.W+t[0]===i};}
+  addDragon(team,cells,dir){
+    const id=this.nextId++;
+    const d={id,team,body:cells.map(c=>[c[0],c[1]]),dir:dir||null,alive:true,mem:{},inbox:[],pending:[],echo:[0,0,0,0,0],echoPending:[0,0,0,0,0],lastCmd:'(has not acted yet)',say:'',born:this.round,rng:rngFrom(this.seed*1009+id*7+1)};
+    if(!d.dir)d.dir=(d.body.length>1&&this.dirBetween(d.body[1],d.body[0]))||'N';
+    for(const c of d.body)this.grid[c[1]*this.W+c[0]]=id;
+    this.byId[id]=d;this.dragons.push(d);return d;
+  }
+  alive(team){return this.dragons.filter(d=>d.alive&&(!team||d.team===team));}
+  kill(d,reason){
+    if(!d.alive)return;d.alive=false;d.deathReason=reason;d.deathRound=this.round;
+    for(const c of d.body)this.grid[c[1]*this.W+c[0]]=-1;
+    for(let k=0;k<d.body.length;k+=2){const c=d.body[k];this.pearl[c[1]*this.W+c[0]]=1;}
+    this.deaths.push({x:d.body[0][0],y:d.body[0][1],team:d.team,age:0});
+    this.log.push({r:this.round,team:d.team,text:`#${d.id} died: ${reason}. Length ${d.body.length}, dropped ${Math.ceil(d.body.length/2)} pearls.`});
+  }
+  tickPearls(){
+    for(let i=0;i<this.n;i++){
+      if(this.gmax[i]===0)continue;const m=this.mirror?this.mirror[i]:i;if(m<i)continue;
+      this.cd[i]--;
+      if(this.cd[i]<=0){const ts=m===i?[i]:[i,m];for(const t of ts){if(!this.pearl[t]&&this.grid[t]<0)this.pearl[t]=1;}this.cd[i]=randInt(this.rng,this.gmin[i],this.gmax[i]);}
+      if(m!==i)this.cd[m]=this.cd[i];
+    }
+  }
+  applyMove(d,steps){
+    for(let s=0;s<steps.length;s++){
+      const dir=steps[s];
+      if(s>0&&d.body.length<=2){this.kill(d,`No Valid Action (could not pay for sprint step ${s+1})`);return;}
+      d.dir=dir;
+      const r=this.step(d.body[0][0],d.body[0][1],dir);
+      if(r.kelp){this.kill(d,'Hit Wall (kelp)');return;}
+      const key=r.y*this.W+r.x;const o=this.at(key);
+      if(o&&o.d===d){this.kill(d,o.tail?'Hit Self (its own tail)':'Hit Self');return;}
+      if(o){if(o.head){const other=o.d;this.kill(other,`Head to Head with #${d.id}`);this.kill(d,`Head to Head with #${other.id}`);}else this.kill(d,`Hit Other Body (#${o.d.id})`);return;}
+      d.body.unshift([r.x,r.y]);this.grid[key]=d.id;
+      if(this.pearl[key]){this.pearl[key]=0;}else{const t=d.body.pop();this.grid[t[1]*this.W+t[0]]=-1;}
+      if(s>0){const t=d.body.pop();this.grid[t[1]*this.W+t[0]]=-1;}
+    }
+  }
+  applySplit(d,n,list){
+    const L=d.body.length;
+    if(!(n>=2)||L-n<2||this.alive(d.team).length>=this.unitLimit){this.kill(d,`No Valid Action (illegal SPLIT ${n} at length ${L})`);return;}
+    const cells=d.body.slice(L-n).reverse();d.body=d.body.slice(0,L-n);
+    const c=this.addDragon(d.team,cells,null);
+    if(!this.dirBetween(cells[1],cells[0]))c.dir=OPP[d.dir];
+    c.parent=d.id;list.push(c);
+    this.log.push({r:this.round,team:d.team,text:`#${d.id} split: kept ${L-n}, new dragon #${c.id} has length ${n}.`});
+  }
+  castSonar(d,dir,val){
+    const L=d.body.length;let start,travel;
+    if(dir===OPP[d.dir]&&L>=2){start=d.body[L-1];travel=this.dirBetween(d.body[L-2],d.body[L-1])||dir;}else{start=d.body[0];travel=dir;}
+    let x=start[0],y=start[1];const path=[[x,y]];let hit='lost';
+    for(let k=0;k<this.W+this.H;k++){
+      const r=this.step(x,y,travel);if(r.kelp){hit='kelp';break;}
+      x=r.x;y=r.y;path.push([x,y]);const o=this.at(y*this.W+x);
+      if(o){hit=(o.d.team===d.team?'ally':'enemy')+(o.head?'_head':'');o.d.pending.push(val);break;}
+    }
+    if(hit!=='lost')d.echoPending[ECHO_KINDS.indexOf(hit)]++;
+    this.rays.push({path,team:d.team,hit,from:d.id,val,dir});
+  }
+  view(d){
+    const g=this;const hx=d.body[0][0],hy=d.body[0][1];
+    return{id:d.id,team:d.team,dir:d.dir,length:d.body.length,round:g.round,W:g.W,H:g.H,unitCount:g.alive(d.team).length,unitLimit:g.unitLimit,msgs:d.inbox.slice(),echoes:d.echo.slice(),rng:d.rng,
+      tile(rx,ry){if(Math.abs(rx)>3||Math.abs(ry)>3)return null;const p=g.wrap(hx+rx,hy+ry);const i=p[1]*g.W+p[0];const o=g.at(i);
+        return{x:p[0],y:p[1],pearl:!!g.pearl[i],cd:g.gmax[i]===0?-1:g.cd[i],dragon:o?{team:o.d.team,id:o.d.id,head:o.head,tail:o.tail,mine:o.d===d}:null,edge:dd=>g.edgeKind(p[0],p[1],dd)};}};
+  }
+  runRound(bots){
+    if(this.over)return;
+    this.round++;this.rays=[];for(const e of this.deaths)e.age++;this.deaths=this.deaths.filter(e=>e.age<2);
+    this.tickPearls();
+    const list=this.alive().sort((a,b)=>a.id-b.id);
+    for(let i=0;i<list.length;i++){
+      const d=list[i];if(!d.alive)continue;
+      d.inbox=d.pending;d.pending=[];d.echo=d.echoPending;d.echoPending=[0,0,0,0,0];
+      let a=null;try{a=bots[d.team](this.view(d),d.mem);}catch(err){console.error(err);a=null;}
+      d.lastCmd=cmdText(a);d.say=(a&&a.say)||'';
+      if(!a||(a.split==null&&!(a.move&&a.move.length))){this.kill(d,'No Valid Action (no action printed)');continue;}
+      if(a.split!=null)this.applySplit(d,a.split,list);else this.applyMove(d,typeof a.move==='string'?a.move.split(''):a.move);
+      if(d.alive&&a.sonar)for(const dd of DIRS)if(a.sonar[dd]!=null)this.castSonar(d,dd,a.sonar[dd]);
+    }
+    this.checkEnd();
+    const s=this.stats();this.history.push({r:this.round,aN:s.A.n,bN:s.B.n,aL:s.A.longest,bL:s.B.longest});
+  }
+  stats(){const s={A:{n:0,longest:0,total:0},B:{n:0,longest:0,total:0}};for(const d of this.dragons)if(d.alive){const t=s[d.team];t.n++;t.total+=d.body.length;t.longest=Math.max(t.longest,d.body.length);}return s;}
+  checkEnd(){
+    if(this.noEnd)return;
+    const s=this.stats();
+    if(s.A.n===0&&s.B.n===0)this.finish(null,'Both teams were wiped out in the same round: draw.');
+    else if(s.A.n===0)this.finish('B','Team A has no dragons left.');
+    else if(s.B.n===0)this.finish('A','Team B has no dragons left.');
+    else if(this.round>=this.maxRounds){
+      if(s.A.longest!==s.B.longest)this.finish(s.A.longest>s.B.longest?'A':'B',`Round ${this.maxRounds} reached. Tiebreak 1, longest living dragon: A ${s.A.longest} vs B ${s.B.longest}.`);
+      else if(s.A.total!==s.B.total)this.finish(s.A.total>s.B.total?'A':'B',`Round ${this.maxRounds}. Longest dragons tied at ${s.A.longest}. Tiebreak 2, total length: A ${s.A.total} vs B ${s.B.total}.`);
+      else this.finish(null,`Round ${this.maxRounds} with equal longest and total length: draw.`);
+    }
+  }
+  finish(w,why){this.over=true;this.winner=w;this.endReason=why;}
+}
+function cmdText(a){
+  if(!a)return '(nothing printed)\nENDTURN';const L=[];
+  if(a.say)L.push('INDICATOR '+a.say);
+  if(a.split!=null)L.push('SPLIT '+a.split);else if(a.move)L.push('MOVE '+(Array.isArray(a.move)?a.move.join(''):a.move));
+  if(a.sonar)for(const d of DIRS)if(a.sonar[d]!=null)L.push(`SONAR ${d} ${a.sonar[d]}`);
+  L.push('ENDTURN');return L.join('\n');
+}
+
+/* ---- random symmetric match maps ---- */
+function makeMatch(size,seed,per){
+  const W=size,H=size;const g=new Game(W,H,seed);const r=rngFrom(seed*31+7);
+  g.mirror=new Int32Array(W*H);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)g.mirror[y*W+x]=(H-1-y)*W+(W-1-x);
+  const rich=[];const nr=Math.max(2,Math.round(size/6));
+  for(let k=0;k<nr;k++)rich.push([randInt(r,0,W-1),randInt(r,0,H-1)]);
+  for(let i=0;i<W*H;i++){
+    const m=g.mirror[i];if(m<i)continue;const x=i%W,y=(i/W)|0;
+    const near=rich.some(p=>Math.abs(p[0]-x)+Math.abs(p[1]-y)<=1);const u=r();
+    let lo,hi;if(near){lo=4;hi=12;}else if(u<0.15){lo=0;hi=0;}else{lo=30;hi=90;}
+    g.gmin[i]=g.gmin[m]=lo;g.gmax[i]=g.gmax[m]=hi;
+    if(hi>0)g.cd[i]=g.cd[m]=randInt(r,1,hi);
+  }
+  const protect=new Uint8Array(W*H);const starts=[];
+  for(let k=0;k<per;k++){
+    const y=Math.floor((k+1)*H/(per+1));const x=3+(k%2)*2;
+    const A=[[x,y],[x-1,y],[x-2,y]];const B=A.map(c=>[W-1-c[0],H-1-c[1]]);
+    starts.push([A,B]);
+    for(const cs of [A,B])for(const c of cs)for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)protect[g.idx(c[0]+dx,c[1]+dy)]=1;
+  }
+  const walls=Math.round(W*H/28);
+  for(let k=0;k<walls;k++){
+    const horiz=r()<0.5;const x=randInt(r,0,W-1),y=randInt(r,0,H-1);const len=randInt(r,2,4);
+    for(let j=0;j<len;j++){
+      const ex=horiz?x+j:x,ey=horiz?y:y+j;const o=horiz?'h':'v';
+      const a1=g.idx(ex,ey),a2=horiz?g.idx(ex,ey-1):g.idx(ex-1,ey);
+      if(protect[a1]||protect[a2])continue;
+      g.setEdge(o,ex,ey,-1);
+      if(o==='h')g.setEdge('h',W-1-ex,H-ey,-1);else g.setEdge('v',W-ex,H-1-ey,-1);
+    }
+  }
+  let pid=1;
+  for(let tries=0;tries<200&&pid<=2;tries++){
+    const o=pid===1?'v':'h';const x=randInt(r,1,W-2),y=randInt(r,1,H-2);
+    const mx=o==='v'?W-x:W-1-x,my=o==='v'?H-1-y:H-y;
+    if(mx===x&&my===y)continue;
+    const a1=g.idx(x,y),a2=o==='h'?g.idx(x,y-1):g.idx(x-1,y);
+    if(protect[a1]||protect[a2])continue;
+    const i1=g.idx(x,y),i2=g.idx(mx,my);const arr=o==='h'?g.hE:g.vE;if(arr[i1]>0||arr[i2]>0)continue;
+    g.setEdge(o,x,y,pid);g.setEdge(o,mx,my,pid);pid++;
+  }
+  for(let i=0;i<W*H;i++){const m=g.mirror[i];if(m<i||g.gmax[i]===0)continue;if(r()<(g.gmax[i]<=12?0.4:0.07)){g.pearl[i]=1;g.pearl[m]=1;}}
+  for(const pr of starts){for(const c of pr[0].concat(pr[1]))g.pearl[c[1]*W+c[0]]=0;g.addDragon('A',pr[0],'E');g.addDragon('B',pr[1],'W');}
+  return g;
+}
+
+/* ---- demo bots ---- */
+function starterBot(v){
+  const ds=DIRS.slice();for(let i=3;i>0;i--){const j=Math.floor(v.rng()*(i+1));const t=ds[i];ds[i]=ds[j];ds[j]=t;}
+  const here=v.tile(0,0);
+  for(const d of ds){if(here.edge(d)==='kelp')continue;const t=v.tile(DV[d][0],DV[d][1]);if(t.dragon)continue;return{move:[d],say:'random safe step'};}
+  return{move:['N'],say:'stuck'};
+}
+function candidates(v){
+  const out=[];const here=v.tile(0,0);
+  for(const d of DIRS){
+    const e=here.edge(d);if(e==='kelp')continue;const dx=DV[d][0],dy=DV[d][1];
+    if(e==='portal'){out.push({d,dx,dy,portal:true,risk:1});continue;}
+    const t=v.tile(dx,dy);if(t.dragon)continue;
+    let risk=0;
+    for(const d2 of DIRS){const n=v.tile(dx+DV[d2][0],dy+DV[d2][1]);if(n&&n.dragon&&n.dragon.head&&!n.dragon.mine)risk+=n.dragon.team===v.team?1:3;}
+    out.push({d,dx,dy,risk});
+  }
+  return out;
+}
+function bfsPearl(v){
+  const seen=new Set(['0,0']);const q=[[0,0,null,0]];let qi=0;
+  while(qi<q.length){
+    const [x,y,first,dist]=q[qi++];const t=v.tile(x,y);
+    if(dist>0&&t.pearl)return{first,dist};
+    for(const d of DIRS){
+      if(t.edge(d)!=='open')continue;const nx=x+DV[d][0],ny=y+DV[d][1];
+      if(Math.abs(nx)>3||Math.abs(ny)>3)continue;const k=nx+','+ny;if(seen.has(k))continue;seen.add(k);
+      if(v.tile(nx,ny).dragon)continue;q.push([nx,ny,first||d,dist+1]);
+    }
+  }
+  return null;
+}
+function openSpace(v,sx,sy,cap){
+  const seen=new Set([sx+','+sy]);const st=[[sx,sy]];let n=0;
+  while(st.length&&n<cap){
+    const [x,y]=st.pop();n++;const t=v.tile(x,y);
+    for(const d of DIRS){
+      if(t.edge(d)!=='open')continue;const nx=x+DV[d][0],ny=y+DV[d][1];
+      if(Math.abs(nx)>3||Math.abs(ny)>3){n+=0.5;continue;}
+      const k=nx+','+ny;if(seen.has(k))continue;seen.add(k);
+      const nt=v.tile(nx,ny);if(nt.dragon&&!(nt.dragon.mine&&nt.dragon.tail))continue;st.push([nx,ny]);
+    }
+  }
+  return n;
+}
+function hunterBot(v,mem,opt){
+  if(opt.split&&v.length>=8&&v.unitCount<v.unitLimit){const n=Math.floor(v.length/2);return{split:n,say:`length ${v.length}, split ${n} off`};}
+  const c=candidates(v);
+  if(!c.length)return{move:[v.dir],say:'no safe move left'};
+  const tgt=bfsPearl(v);
+  if(!mem.wdir||v.rng()<0.08)mem.wdir=DIRS[Math.floor(v.rng()*4)];
+  let best=null;
+  for(const m of c){
+    const sp=m.portal?4:openSpace(v,m.dx,m.dy,v.length+4);
+    let s=Math.min(sp,v.length+2)*2-m.risk*6;
+    if(tgt&&m.d===tgt.first)s+=12;
+    if(!tgt&&m.d===mem.wdir)s+=3;
+    if(m.d===v.dir)s+=0.5;
+    s+=v.rng()*0.2;
+    if(!best||s>best.s)best=Object.assign({},m,{s});
+  }
+  let say='exploring';
+  if(tgt&&best.d===tgt.first)say=`pearl ${tgt.dist} step${tgt.dist>1?'s':''} away`;
+  else if(best.risk)say='risky, boxed in';
+  else if(tgt)say='pearl path unsafe, detour';
+  return{move:[best.d],say};
+}
+const STRATS={
+  starter:'Starter bot (random safe step)',
+  hunter:'Pearl hunter (BFS in 7×7)',
+  splitter:'Hunter + split at length 8'
+};
+function makeBot(kind,sonar){
+  return function(v,mem){
+    const a=kind==='starter'?starterBot(v,mem):hunterBot(v,mem,{split:kind==='splitter'});
+    if(sonar&&a.move&&(v.round+v.id)%3===0)a.sonar={[v.dir]:v.id};
+    return a;
+  };
+}
+
+/* ---- rule demo scenarios ---- */
+function pp(g,cells){for(const c of cells)g.pearl[c[1]*g.W+c[0]]=1;}
+const SCEN=[
+ {name:'Move & eat',setup(g){g.addDragon('A',[[3,3],[2,3],[1,3]]);pp(g,[[5,3],[6,3]]);},steps:[
+  {cap:'Dragon <b>#0</b> (team A, blue) has <b>length 3</b>: a head plus two body segments. It faces East, and two pearls lie ahead. Press <b>Next step</b>. Each press is one round, and in each round this dragon prints exactly one action.'},
+  {act:{0:{move:'E'}},cap:'<code>MOVE E</code>. The head moves one tile East and the body follows. Length is still 3.'},
+  {act:{0:{move:'E'}},cap:'<code>MOVE E</code> onto a pearl. It is eaten and the tail <b>does not</b> move this turn, so length goes 3 → 4. Eating is the only way to grow.'},
+  {act:{0:{move:'E'}},cap:'<code>MOVE E</code>, another pearl: length 5.'},
+  {act:{0:{move:'N'}},cap:'<code>MOVE N</code>. Turning is free. The one direction that is always fatal is straight backwards (West here), because the head would move into its own neck.'},
+  {act:{0:{move:'N'}},cap:'<code>MOVE N</code>. That is all normal movement is: one step per round with the body trailing behind.'}]},
+ {name:'Own-tail trap',setup(g){g.addDragon('A',[[2,2],[2,3],[3,3],[3,2]]);},steps:[
+  {cap:'This length-4 dragon has coiled up. Its <b>tail</b> sits directly East of its head. The tail is about to move anyway, so is stepping East safe?'},
+  {act:{0:{move:'E'}},cap:'No. <code>MOVE E</code> kills it: <b>Hit Self</b>. The engine checks the destination <b>before</b> the tail advances, so your own tail tile counts as blocked. On death, every second segment starting from the head turns into a pearl: ⌈4/2⌉ = 2 pearls.'}]},
+ {name:'Head-on crash',setup(g){g.addDragon('A',[[2,3],[1,3],[0,3]]);g.addDragon('B',[[6,3],[7,3],[8,3],[9,3],[9,4]]);},steps:[
+  {cap:'Blue #0 (length 3) and orange #1 (length 5) head straight at each other. Turn order is by id, so within a round #0 always acts before #1.'},
+  {act:{0:{move:'E'},1:{move:'W'}},cap:'Both step forward. One empty tile is left between the heads.'},
+  {act:{0:{move:'E'},1:{move:'W'}},cap:'#0 moves first, into the gap. Then #1 steps onto #0\'s head, and <b>both die</b> regardless of size or team. #0 drops 2 pearls, #1 drops 3. The long dragon lost far more. Rule for our bot: avoid tiles an enemy head can also reach this round, unless we are the shorter one and the trade is worth it.'}]},
+ {name:'Sprinting',setup(g){g.addDragon('A',[[5,5],[4,5],[3,5],[2,5],[1,5],[0,5]]);pp(g,[[6,3]]);},steps:[
+  {cap:'A length-6 dragon. A pearl is 3 steps away (up, up, right). Normally that takes 3 rounds.'},
+  {act:{0:{move:'NNE'}},cap:'<code>MOVE NNE</code>: three steps in one round. Every step after the first costs one segment, so 3 steps cost 2. Step 3 lands on the pearl (+1). Net: 6 → 5. Sprinting trades length for speed, and collisions are checked at every step.'},
+  {act:{0:{move:'EEEEE'}},cap:'<code>MOVE EEEEE</code> at length 5. Steps 2, 3 and 4 cost one segment each, taking it down to length 2. A length-2 dragon cannot pay for step 5, so it dies (<b>No Valid Action</b>). It also wrapped across the East border onto column 0 on the way.'}]},
+ {name:'Splitting',setup(g){g.addDragon('A',[[6,3],[5,3],[4,3],[3,3],[2,3],[1,3]]);pp(g,[[8,3]]);},steps:[
+  {cap:'A length-6 dragon about to split. Any dragon must be at least length 2, and a team can have at most 64 alive. Legal splits here: 2, 3 or 4.'},
+  {act:{0:{split:3},1:{move:'W'}},cap:'<code>SPLIT 3</code>. The parent keeps its front 3. The child is the rear 3 <b>reversed</b>: the old tail is now the child\'s head, facing away (West). The child gets the next id, <b>#1</b>, and takes its first turn later <b>in this same round</b> (it already moved West). It is a fresh copy of our program with no memory of its parent.'},
+  {act:{0:{move:'E'},1:{move:'W'}},cap:'Two independent dragons. The child wrapped across the West border.'},
+  {act:{0:{move:'E'},1:{move:'N'}},cap:'Parent eats a pearl: length 4. Child turns North.'},
+  {act:{0:{split:3},1:{move:'N'}},cap:'<code>SPLIT 3</code> at length 4 would leave the parent with 1 segment. An illegal split kills the dragon. At length 4 the only legal split was <code>SPLIT 2</code>.'}]},
+ {name:'Wrap, portal, kelp',vision:true,setup(g){g.addDragon('A',[[8,2],[7,2],[6,2]]);g.setEdge('v',3,4,1);g.setEdge('v',7,5,1);g.setEdge('v',9,5,-1);g.setEdge('h',5,1,-1);g.setEdge('h',6,1,-1);},steps:[
+  {cap:'The dashed square is this dragon\'s <b>vision</b>: 7×7 tiles centred on its head, and that is all it is told each turn. The two purple edges are one <b>portal pair</b> (id 1). Green edges are <b>kelp</b>.'},
+  {act:{0:{move:'E'}},cap:'East.'},
+  {act:{0:{move:'E'}},cap:'The map wraps: stepping off the East edge brings the head in on the West edge. The vision square wraps too.'},
+  {act:{0:{move:'S'}},cap:'South.'},
+  {act:{0:{move:'S'}},cap:'South.'},
+  {act:{0:{move:'E'}},cap:'East.'},
+  {act:{0:{move:'E'}},cap:'The portal is on this tile\'s East edge. The dragon can see the portal, but vision does not pass through portals, so it has no idea what is on the other side.'},
+  {act:{0:{move:'E'}},cap:'<code>MOVE E</code> through portal 1: the head comes out of the partner edge, still moving East. The body is now split across both ends.'},
+  {act:{0:{move:'E'}},cap:'East. Kelp directly ahead.'},
+  {act:{0:{move:'E'}},cap:'<code>MOVE E</code> into kelp: <b>Hit Wall</b>. Kelp edges are solid. This is exactly the "portal straight into kelp" accident the docs warn about.'}]},
+ {name:'Sonar',setup(g){g.addDragon('A',[[2,3],[1,3],[0,3]]);g.addDragon('A',[[7,2],[7,3],[7,4]]);g.addDragon('B',[[4,5],[3,5],[2,5]]);g.setEdge('h',3,1,-1);},steps:[
+  {cap:'Sonar is the only way dragons talk. Each turn a dragon may fire up to 4 rays (N, E, S, W), each carrying one unsigned 64-bit number. Blue #0 will move East and then fire all four.'},
+  {act:{0:{move:'E',sonar:{N:7,E:42,S:99,W:1806}},1:{move:'N'},2:{move:'E'}},cap:g=>`#0 moved East, then fired N=7, E=42, S=99, W=1806. W is opposite its facing, so that ray leaves from the <b>tail</b> and wraps around the board. Each ray stops at the first kelp or dragon part it meets.<br>• Ally #1 heard <b>[${g.byId[1].inbox.join(', ')}]</b> in this same round, because its id is higher than #0's.<br>• Enemy #2 heard <b>[${g.byId[2].inbox.join(', ')}]</b>. Enemies can intercept messages, and nothing says who sent them.<br>• The N ray hit kelp and delivered nothing.`},
+  {act:{0:{move:'E'},1:{move:'N'},2:{move:'E'}},cap:g=>`Start of #0's next turn: it receives <code>ECHOES ${g.byId[0].echo.join(' ')}</code> (kelp, ally, ally head, enemy, enemy head). Without seeing anything, #0 learns 1 ray hit kelp, 2 hit an ally body and 1 hit an enemy body. Echoes are a free long-range radar.`}]}
+];
+/* ENGINE END */
+
+/* ---- drawing ---- */
+const COL={A:'#4aa3ff',B:'#ff9a3c',Ah:'#a9d6ff',Bh:'#ffcb97'};
+function rr(c,x,y,w,h,r){c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h);}
+function fitCanvas(cv,w,h){const dpr=window.devicePixelRatio||1;const W=Math.round(w*dpr),H=Math.round(h*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}cv.style.width=w+'px';const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return c;}
+function adj(a,b){return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])===1;}
+function drawEdgeLine(c,x1,y1,x2,y2,v,cs){
+  c.lineCap='round';
+  if(v===-1){c.strokeStyle='#3fcf6e';c.lineWidth=Math.max(3,cs*0.17);}else{c.strokeStyle='#c07bff';c.lineWidth=Math.max(3,cs*0.2);}
+  c.beginPath();c.moveTo(x1+(x1===x2?0:2),y1+(y1===y2?0:2));c.lineTo(x2-(x1===x2?0:2),y2-(y1===y2?0:2));c.stroke();
+  if(v>0){c.fillStyle='#f0e2ff';c.font=`bold ${Math.max(9,cs*0.36)}px system-ui`;c.textAlign='center';c.textBaseline='middle';c.fillText(v,(x1+x2)/2+(x1===x2?cs*0.24:0),(y1+y2)/2+(y1===y2?-cs*0.26:0));}
+}
+function drawBoard(cv,g,o){
+  const W=g.W,H=g.H,cs=o.cell,w=W*cs,h=H*cs;const c=fitCanvas(cv,w,h);
+  c.fillStyle='#0b2435';c.fillRect(0,0,w,h);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    if(g.gmax[y*W+x]>0&&g.gmax[y*W+x]<=12){c.fillStyle='#10344a';c.fillRect(x*cs,y*cs,cs,cs);}
+    else if((x+y)&1){c.fillStyle='#0d2a3d';c.fillRect(x*cs,y*cs,cs,cs);}
+  }
+  const sel=o.sel!=null?g.byId[o.sel]:null;
+  if(sel&&sel.alive&&o.vision){
+    const hx=sel.body[0][0],hy=sel.body[0][1];c.fillStyle='rgba(255,255,255,0.09)';
+    for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const p=g.wrap(hx+dx,hy+dy);c.fillRect(p[0]*cs,p[1]*cs,cs,cs);}
+    c.strokeStyle='rgba(255,255,255,0.6)';c.setLineDash([5,4]);c.lineWidth=1.5;
+    for(const ox of [-W,0,W])for(const oy of [-H,0,H])c.strokeRect((hx-3+ox)*cs+1,(hy-3+oy)*cs+1,7*cs-2,7*cs-2);
+    c.setLineDash([]);
+  }
+  if(o.cd){c.font=`${Math.max(8,cs*0.3)}px ui-monospace,monospace`;c.fillStyle='rgba(170,205,225,0.55)';c.textAlign='right';c.textBaseline='bottom';
+    for(let i=0;i<g.n;i++)if(g.gmax[i]>0&&!g.pearl[i]&&g.grid[i]<0)c.fillText(g.cd[i],(i%W)*cs+cs-2,((i/W)|0)*cs+cs-1);}
+  for(let i=0;i<g.n;i++)if(g.pearl[i]){const cx=(i%W)*cs+cs/2,cy=((i/W)|0)*cs+cs/2;const gr=c.createRadialGradient(cx-cs*0.06,cy-cs*0.06,1,cx,cy,cs*0.22);gr.addColorStop(0,'#ffffff');gr.addColorStop(1,'#cfc6b0');c.fillStyle=gr;c.beginPath();c.arc(cx,cy,Math.max(2.5,cs*0.2),0,7);c.fill();}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(g.hE[i])drawEdgeLine(c,x*cs,y*cs,(x+1)*cs,y*cs,g.hE[i],cs);if(g.vE[i])drawEdgeLine(c,x*cs,y*cs,x*cs,(y+1)*cs,g.vE[i],cs);}
+  c.strokeStyle='rgba(143,176,194,0.5)';c.lineWidth=1;c.setLineDash([6,4]);c.beginPath();c.moveTo(w-0.5,0);c.lineTo(w-0.5,h);c.moveTo(0,h-0.5);c.lineTo(w,h-0.5);c.stroke();c.setLineDash([]);
+  for(const ray of g.rays){
+    c.strokeStyle=ray.team==='A'?'rgba(140,200,255,0.95)':'rgba(255,190,120,0.95)';c.lineWidth=2;c.setLineDash([5,4]);c.beginPath();
+    ray.path.forEach((p,k)=>{const px=p[0]*cs+cs/2,py=p[1]*cs+cs/2;if(k===0||!adj(ray.path[k-1],p))c.moveTo(px,py);else c.lineTo(px,py);});
+    c.stroke();c.setLineDash([]);
+    const e=ray.path[ray.path.length-1];
+    if(ray.hit!=='lost'){c.strokeStyle=ray.hit==='kelp'?'#3fcf6e':ray.hit.startsWith('enemy')?'#ff5a6a':'#ffffff';c.lineWidth=2;c.beginPath();c.arc(e[0]*cs+cs/2,e[1]*cs+cs/2,cs*0.36,0,7);c.stroke();}
+    if(o.rayLabels){c.fillStyle='#fff';c.font=`bold ${Math.max(10,cs*0.3)}px system-ui`;c.textAlign='center';c.textBaseline='middle';const m=ray.path[Math.min(ray.path.length-1,1)];const lbl=ray.dir+' '+ray.val;const tw=c.measureText(lbl).width/2+3;c.fillText(lbl,Math.min(w-tw,Math.max(tw,m[0]*cs+cs/2)),m[1]*cs+cs*0.1);}
+  }
+  for(const d of g.dragons){
+    if(!d.alive)continue;const col=COL[d.team];const L=d.body.length;
+    c.strokeStyle=col;c.lineWidth=cs*0.46;c.lineCap='round';
+    for(let k=1;k<L;k++){const a=d.body[k-1],b=d.body[k];if(adj(a,b)){c.globalAlpha=1-0.5*k/L;c.beginPath();c.moveTo(a[0]*cs+cs/2,a[1]*cs+cs/2);c.lineTo(b[0]*cs+cs/2,b[1]*cs+cs/2);c.stroke();}}
+    for(let k=L-1;k>=1;k--){const p=d.body[k];c.globalAlpha=1-0.5*k/L;c.fillStyle=col;rr(c,p[0]*cs+cs*0.17,p[1]*cs+cs*0.17,cs*0.66,cs*0.66,cs*0.18);c.fill();}
+    c.globalAlpha=1;
+    const hx=d.body[0][0],hy=d.body[0][1],cx=hx*cs+cs/2,cy=hy*cs+cs/2;
+    c.fillStyle=COL[d.team+'h'];c.beginPath();c.arc(cx,cy,cs*0.43,0,7);c.fill();c.strokeStyle=col;c.lineWidth=2;c.stroke();
+    const fx=DV[d.dir][0],fy=DV[d.dir][1],px=-fy,py=fx;c.fillStyle='#07141f';
+    for(const s of [-1,1]){c.beginPath();c.arc(cx+fx*cs*0.17+px*s*cs*0.15,cy+fy*cs*0.17+py*s*cs*0.15,Math.max(1.5,cs*0.075),0,7);c.fill();}
+    if(o.sel===d.id){c.strokeStyle='#ffffff';c.lineWidth=2.5;c.beginPath();c.arc(cx,cy,cs*0.58,0,7);c.stroke();}
+    if(o.ids){c.font=`bold ${Math.max(9,cs*0.34)}px system-ui`;c.textAlign='center';c.textBaseline='middle';c.lineWidth=3;c.strokeStyle='#07141f';c.strokeText('#'+d.id,cx,cy-cs*0.62);c.fillStyle='#fff';c.fillText('#'+d.id,cx,cy-cs*0.62);}
+  }
+  for(const e of g.deaths){c.strokeStyle=`rgba(255,90,106,${e.age===0?1:0.45})`;c.lineWidth=3;const x=e.x*cs,y=e.y*cs,m=cs*0.18;c.beginPath();c.moveTo(x+m,y+m);c.lineTo(x+cs-m,y+cs-m);c.moveTo(x+cs-m,y+m);c.lineTo(x+m,y+cs-m);c.stroke();c.beginPath();c.arc(x+cs/2,y+cs/2,cs*0.46,0,7);c.stroke();}
+}
+function drawVision(cv,g,d,showCd){
+  const cs=26,S=7*cs;const c=fitCanvas(cv,S,S);c.fillStyle='#061019';c.fillRect(0,0,S,S);
+  if(!d){return;}
+  if(!d.alive){c.fillStyle='#ff5a6a';c.font='bold 14px system-ui';c.textAlign='center';c.textBaseline='middle';c.fillText('dead',S/2,S/2);return;}
+  const v=g.view(d);
+  for(let ry=-3;ry<=3;ry++)for(let rx=-3;rx<=3;rx++){
+    const t=v.tile(rx,ry);const x=(rx+3)*cs,y=(ry+3)*cs;
+    c.fillStyle=((rx+ry)&1)?'#0d2a3d':'#0b2435';c.fillRect(x,y,cs,cs);
+    if(showCd&&t.cd>=0&&!t.pearl&&!t.dragon){c.fillStyle='rgba(170,205,225,0.6)';c.font='9px ui-monospace,monospace';c.textAlign='right';c.textBaseline='bottom';c.fillText(t.cd,x+cs-2,y+cs-1);}
+    if(t.pearl){c.fillStyle='#f4f1e8';c.beginPath();c.arc(x+cs/2,y+cs/2,5,0,7);c.fill();}
+    if(t.dragon){c.fillStyle=COL[t.dragon.team];if(t.dragon.head){c.fillStyle=COL[t.dragon.team+'h'];c.beginPath();c.arc(x+cs/2,y+cs/2,cs*0.4,0,7);c.fill();}else{c.globalAlpha=0.85;rr(c,x+4,y+4,cs-8,cs-8,4);c.fill();c.globalAlpha=1;}}
+    for(const dd of DIRS){const k=t.edge(dd);if(k==='open')continue;const x1=dd==='E'?x+cs:x,y1=dd==='S'?y+cs:y,x2=dd==='W'?x:x+cs,y2=dd==='N'?y:y+cs;
+      c.strokeStyle=k==='kelp'?'#3fcf6e':'#c07bff';c.lineWidth=3;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();}
+  }
+  c.strokeStyle='#fff';c.lineWidth=2;c.strokeRect(3*cs+1,3*cs+1,cs-2,cs-2);
+}
+function drawChart(cv,g){
+  const w=Math.max(260,cv.parentElement.clientWidth),h=190;const c=fitCanvas(cv,w,h);c.fillStyle='#0a1b27';c.fillRect(0,0,w,h);
+  const hist=g.history;const maxR=Math.max(60,g.round);
+  const panel=(top,ph,title,ka,kb)=>{
+    let mx=4;for(const e of hist)mx=Math.max(mx,e[ka],e[kb]);
+    c.fillStyle='#8fb0c2';c.font='12px system-ui';c.textAlign='left';c.textBaseline='top';c.fillText(`${title} (max ${mx})`,8,top+2);
+    const X=r=>30+(w-40)*(r/maxR),Y=val=>top+ph-6-(ph-24)*(val/mx);
+    c.strokeStyle='#1d4459';c.lineWidth=1;c.beginPath();c.moveTo(30,top+ph-6);c.lineTo(w-10,top+ph-6);c.stroke();
+    for(const [k,col] of [[ka,COL.A],[kb,COL.B]]){c.strokeStyle=col;c.lineWidth=2;c.beginPath();hist.forEach((e,i)=>{const x=X(e.r),y=Y(e[k]);if(i===0)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();}
+  };
+  panel(0,h/2,'Dragons alive','aN','bN');panel(h/2,h/2,'Longest dragon','aL','bL');
+}
+
+/* ---- rule demo player ---- */
+(function(){
+  const cv=document.getElementById('scCanvas'),cap=document.getElementById('scCap'),cmd=document.getElementById('scCmd'),cnt=document.getElementById('scCount'),nextB=document.getElementById('scNext'),tabs=document.getElementById('scTabs'),visChk=document.getElementById('scVision');
+  let cur=0,g,si;
+  const bot=v=>{const s=SCEN[cur].steps[si];return (s.act&&s.act[v.id])||{move:[v.dir]};};
+  function render(){
+    const sc=SCEN[cur];const cell=Math.max(26,Math.min(52,Math.floor((cv.parentElement.clientWidth-16)/10)));
+    drawBoard(cv,g,{cell,sel:0,vision:visChk.checked,ids:true,rayLabels:true});
+    const s=sc.steps[si];cap.innerHTML=typeof s.cap==='function'?s.cap(g):s.cap;
+    cnt.textContent=`step ${si} of ${sc.steps.length-1}`;nextB.disabled=si>=sc.steps.length-1;
+    if(si===0)cmd.textContent='(nothing yet)';
+    else cmd.textContent=g.dragons.filter(d=>d.lastCmd&&(d.alive||d.deathRound===g.round)).map(d=>`# dragon ${d.id} (${d.team})${d.alive?'':'  → died: '+d.deathReason}\n${d.lastCmd}`).join('\n\n');
+  }
+  function reset(){g=new Game(10,7,1);g.maxRounds=999;g.noEnd=true;SCEN[cur].setup(g);si=0;visChk.checked=!!SCEN[cur].vision;[...tabs.children].forEach((b,i)=>b.classList.toggle('on',i===cur));render();}
+  SCEN.forEach((s,i)=>{const b=document.createElement('button');b.textContent=`${i+1}. ${s.name}`;b.onclick=()=>{cur=i;reset();};tabs.appendChild(b);});
+  nextB.onclick=()=>{si++;g.runRound({A:bot,B:bot});render();};
+  document.getElementById('scReset').onclick=reset;visChk.onchange=render;
+  window.addEventListener('resize',render);reset();
+})();
+
+/* ---- full match simulator ---- */
+(function(){
+  const $=id=>document.getElementById(id);
+  const cv=$('simCanvas'),wrapEl=$('simWrap');
+  for(const id of ['stratA','stratB'])for(const k in STRATS){const o=document.createElement('option');o.value=k;o.textContent=STRATS[k];$(id).appendChild(o);}
+  $('stratA').value='splitter';$('stratB').value='hunter';
+  let g,sel=null,playing=false,acc=0,last=0,bots;
+  function mkBots(){bots={A:makeBot($('stratA').value,$('optSonar').checked),B:makeBot($('stratB').value,$('optSonar').checked)};}
+  function newGame(){g=makeMatch(+$('mapSize').value,+$('seed').value||1,+$('startPer').value);sel=0;mkBots();playing=false;$('play').textContent='▶ Play';render();}
+  function cell(){return Math.max(9,Math.min(30,Math.floor((wrapEl.clientWidth-16)/g.W)));}
+  function render(){
+    if(sel==null||!g.byId[sel]||(!g.byId[sel].alive&&g.round-(g.byId[sel].deathRound||0)>3)){const a=g.alive('A')[0]||g.alive()[0];sel=a?a.id:sel;}
+    drawBoard(cv,g,{cell:cell(),sel,vision:$('optVision').checked,cd:$('optCd').checked,ids:$('optIds').checked});
+    const s=g.stats();
+    $('stats').innerHTML=`<div>Round</div><div style="grid-column:span 2"><b>${g.round}</b> / ${g.maxRounds}</div><div></div><div class="ta">Team A</div><div class="tb">Team B</div><div>Dragons alive</div><div>${s.A.n}</div><div>${s.B.n}</div><div>Longest dragon</div><div>${s.A.longest}</div><div>${s.B.longest}</div><div>Total length</div><div>${s.A.total}</div><div>${s.B.total}</div>`;
+    const d=sel!=null?g.byId[sel]:null;
+    if(d){
+      $('fTitle').innerHTML=`<span class="${d.team==='A'?'ta':'tb'}">#${d.id} (team ${d.team})</span>`;
+      $('fCmd').textContent=d.alive?d.lastCmd:`died in round ${d.deathRound}\n${d.deathReason}`;
+      $('fInfo').innerHTML=d.alive?`Length <b>${d.body.length}</b>, facing <b>${d.dir}</b>${d.parent!=null?`, born from #${d.parent} in round ${d.born}`:''}.<br>Sonar heard last turn: ${d.inbox.length?d.inbox.join(', '):'nothing'}.<br>Echoes (kelp, ally, ally head, enemy, enemy head): ${d.echo.join(' ')}`:'Click another dragon to follow it.';
+    }
+    drawVision($('visCanvas'),g,d,$('optCd').checked);drawChart($('chart'),g);
+    $('log').innerHTML=g.log.slice(-40).reverse().map(e=>`<li><span class="${e.team==='A'?'ta':'tb'}">R${e.r}</span> ${e.text}</li>`).join('')||'<li class="muted">Nothing yet.</li>';
+    const b=$('banner');
+    if(g.over){b.style.display='block';b.innerHTML=g.winner?`<b class="${g.winner==='A'?'ta':'tb'}">Team ${g.winner} wins</b> after ${g.round} rounds. ${g.endReason}`:`<b>Draw</b> after ${g.round} rounds. ${g.endReason}`;}else b.style.display='none';
+  }
+  function frame(t){
+    if(playing&&!g.over){const rate=+$('speed').value;acc+=(t-last)/1000*rate;let n=0;while(acc>=1&&n<10&&!g.over){g.runRound(bots);acc-=1;n++;}if(n)render();}
+    if(g.over&&playing){playing=false;$('play').textContent='▶ Play';}
+    last=t;requestAnimationFrame(frame);
+  }
+  $('play').onclick=()=>{if(g.over)return;playing=!playing;$('play').textContent=playing?'❚❚ Pause':'▶ Play';acc=1;};
+  $('stepR').onclick=()=>{g.runRound(bots);render();};
+  $('toEnd').onclick=()=>{let n=0;while(!g.over&&n<600){g.runRound(bots);n++;}render();};
+  $('newMap').onclick=newGame;
+  for(const id of ['mapSize','startPer'])$(id).onchange=newGame;
+  for(const id of ['stratA','stratB','optSonar'])$(id).onchange=mkBots;
+  for(const id of ['optVision','optCd','optIds'])$(id).onchange=render;
+  cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect();const x=Math.floor((e.clientX-r.left)/r.width*g.W),y=Math.floor((e.clientY-r.top)/r.height*g.H);
+    let best=null;for(let dy=-1;dy<=1&&!best;dy++)for(let dx=-1;dx<=1&&!best;dx++){const o=g.at(g.idx(x+dx,y+dy));if(o&&(dx===0&&dy===0||!best))best=o;}
+    const o=g.at(g.idx(x,y))||best;if(o){sel=o.d.id;render();}});
+  window.addEventListener('resize',render);
+  $('batch').onclick=()=>{
+    const out=$('batchOut'),btn=$('batch');btn.disabled=true;const base=+$('seed').value||1,N=10;let k=0,res={A:0,B:0,D:0},lens={A:0,B:0},cur=null,cb=null;
+    const size=+$('mapSize').value,per=+$('startPer').value,sa=$('stratA').value,sb=$('stratB').value;
+    function tick(){
+      const t0=performance.now();
+      while(performance.now()-t0<25){
+        if(!cur){if(k>=N){out.innerHTML=`Team A (${STRATS[sa]}) won <b class="ta">${res.A}</b>, Team B (${STRATS[sb]}) won <b class="tb">${res.B}</b>, draws <b>${res.D}</b>. Average longest dragon at the end: A ${(lens.A/N).toFixed(1)}, B ${(lens.B/N).toFixed(1)}.`;btn.disabled=false;return;}
+          cur=makeMatch(size,base+1000+k,per);cb={A:makeBot(sa,false),B:makeBot(sb,false)};}
+        cur.runRound(cb);
+        if(cur.over){const s=cur.stats();lens.A+=s.A.longest;lens.B+=s.B.longest;res[cur.winner||'D']++;k++;cur=null;}
+      }
+      out.textContent=`Running game ${Math.min(k+1,N)} of ${N}${cur?`, round ${cur.round}`:''}...`;setTimeout(tick,0);
+    }
+    tick();
+  };
+  newGame();requestAnimationFrame(t=>{last=t;frame(t);});
+})();
+
+/* ---- budget bars ---- */
+(function(){
+  const rows=[['Python: parse one round (helper)',10e6,'#4aa3ff'],['Python: flood fill of a 32×32 map',19e6,'#4aa3ff'],['One output write/flush',2.5e6,'#ff9a3c'],['C++: flood fill of a 32×32 map',0.3e6,'#5ee0a0']];
+  document.getElementById('bars').innerHTML=rows.map(r=>`<div>${r[0]}</div><div class="bar"><span style="width:${Math.max(0.6,r[1]/1e6)}%;background:${r[2]}"></span><em>${(r[1]/1e6).toLocaleString()}M of 100M points (${(r[1]/1e6).toFixed(1)}%)</em></div>`).join('');
+})();
+</script>
+</body>
+</html>
